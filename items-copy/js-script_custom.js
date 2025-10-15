@@ -7,7 +7,7 @@ window.customFilters = [
     key: "タグ1",
     label: "分類",
     getter: d => d.タグ1 ? [d.タグ1] : [],
-    options: ["ジェネラル", "ユニーク", "エフェクト", "Dロイス", "FH専用", "エンブレム", "トレイル"],
+    options: ["ジェネラル"],
     match: "partial"
   },
   {
@@ -15,15 +15,7 @@ window.customFilters = [
     key: "種別",
     label: "種別",
     getter: d => d.種別 ? [d.種別] : [],
-    options: ["武器", "防具"],
-    match: "partial"
-  },
-  {
-    id: "filter-tag3",
-    key: "タグ3",
-    label: "制限",
-    getter: d => d.タグ3 && d.タグ3.trim() ? d.タグ3.split(/\s*,\s*/) : ["なし"],
-    options: ["なし","レアアイテム"],
+    options: ["武器", "防具", "ヴィークル", "一般", "コネ"],
     match: "partial"
   }
 ];
