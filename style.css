@@ -1,0 +1,312 @@
+/* -------------------- */
+/* 基本スタイル */
+/* -------------------- */
+body {
+  font-family: sans-serif;
+  margin: 50px;
+  color: black;
+  background-color: #fff;
+}
+
+h1 { margin-bottom: 5px; }
+p { margin-bottom: 20px; }
+
+#searchBox, select {
+  margin: 10px 0;
+  padding: 4px 6px;
+  font-size: 1.2em;
+  border-radius: 6px;
+  border: 1px solid #818181;
+  color: #000;
+}
+
+.name {
+  display: inline;
+  font-size: 22px;
+  font-weight: bold;
+  color: black;
+  padding-left: 6px;
+  border-left: 4px solid #ccc;
+  margin-bottom: 2px;
+  margin-right: 10px;
+}
+
+.types {
+  display: inline-block;
+  margin: 0px 0px 0px 5px;
+  font-size: 0.8em;
+  color: #666;
+}
+
+.typeTag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background-color: #f2f2f2;
+  line-height: 1.2em;
+}
+
+.copyable {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  color: black;
+  margin: 5px 0;   /* ← デフォルトの大きな余白を小さくする */
+}
+
+.copyable:hover {
+  background-color: #f0f0f0;
+  text-decoration: none;
+}
+
+/* ドラマ・決戦用ラベル部分 */
+.label {
+    display: inline;
+    font-weight: bold;
+    font-size: 1.1em; /* 少し大きめ */
+    margin:10px;
+    color: #666; /* 好きな色に変更可能 */
+}
+
+.label-types-copy-block {
+    margin: 12px; /* ブロック間の余白 */
+}
+
+.label-types-copy-block .label {
+    font-weight: bold;
+    font-size: 1em; /* ラベルを少し大きめに */
+    margin-right: 8px;
+    color: #333;
+}
+
+.label-types-copy-block .types {
+    display: inline-flex;
+    gap: 5px;
+    vertical-align: middle;
+}
+
+.label-types-copy-block .copyable {
+    display: block;
+    margin-top: 6px;
+    cursor: pointer;
+}
+
+/* ドラマ・決戦用コピー可能テキスト */
+.copyable.kizato {
+    margin: 4px 0;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    color: black;
+}
+
+.copyable.kizato:hover {
+    background-color: #f0f0f0;
+    text-decoration: none;
+}
+
+select {
+  font-size: 0.9em;
+  padding: 2px 4px;
+  margin-right: 6px;
+}
+
+.defaultOption { color: #888; }
+select option:not(.defaultOption) { color: black; }
+
+#detailedFilters { margin: 2px 0 5px; }
+.hidden { display: none; }
+#toggleFilters { margin: 10px 0; }
+
+.selectbox-3 {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.selectbox-3::after {
+  position: absolute;
+  right: 15px;
+  width: 10px;
+  height: 7px;
+  background-color: #787c85;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  content: '';
+  pointer-events: none;
+}
+.selectbox-3 select {
+  appearance: none;
+  min-width: 80px;
+  height: 2em;
+  padding: .3em calc(.6em + 20px) .3em .6em;
+  border: 1px solid #8e949f;
+  border-radius: 12px;
+  background-color: #fff;
+  color: #585c65;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.filterButton {
+  font-size: 1em;
+  padding: 4px 10px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  text-align: left;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 5px;
+  position: relative;
+  transition: color 0.2s;
+}
+.filterButton::before {
+  content: "▶";
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.3s ease;
+}
+.filterButton.open::before { transform: rotate(90deg); }
+
+.info { margin-bottom: 5px; padding: 2px; }
+.item { padding: 20px 0; border-bottom: 1px solid #ccc; }
+
+/* トップへ戻るボタン */
+.top-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5em 1em;
+  background-color: #fff;
+  color: #666;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9em;
+  border: 1px solid #666;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.top-button::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 10px;
+  border-top: 2px solid #666;
+  border-right: 2px solid #666;
+  transform: rotate(-135deg);
+}
+
+.toggle-button-1 {
+  position: fixed;
+  top: 1.2em;
+  right: 1.2em;
+  width: 4em;
+  height: 2em;
+  border-radius: 2em;
+  background-color: #ddd;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  z-index: 1000;
+  font-size: 30px;
+}
+
+.toggle-button-1:has(:checked) { background-color: #444; }
+
+.toggle-button-1 .icon {
+  position: absolute;
+  top: 0.15em;
+  left: 0.15em;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  transition: left 0.3s;
+}
+
+.toggle-button-1 .icon::before { content: "☀️"; }
+.toggle-button-1:has(:checked) .icon { left: 2.1em; }
+.toggle-button-1:has(:checked) .icon::before { content: "🌙"; }
+.toggle-button-1 input { display: none; }
+
+/* 一覧切り替えボタン */
+.button-group {
+    display: flex;
+    justify-content: flex-start; /* ボタンの間に均等スペース */
+    gap: 5px; /* ボタン間の隙間も調整可能 */
+    margin-bottom: 20px; /* 下に余白を付けたい場合 */
+}
+
+.button-36 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    padding: 0.6em 0.6em;
+    border: 1px solid #3d61a9;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #3d61a9;
+    font-size: 0.9em;
+}
+
+.button-36:hover {
+    border: none;
+    background-color: #406ec9;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 切り替え固定 */
+.button-36.active {
+  background-color: #3d61a9; /* ホバーと同じ色に */
+  color: #fff;
+  cursor: default;        /* カーソルをデフォルトにして反応させない */
+  pointer-events: none;   /* クリックも無効化 */
+}
+
+/* カードコンテナ */
+.tool-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+  margin-top: 30px;
+}
+
+/* 各カード */
+.tool-card {
+  display: block;
+  width: 250px;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  text-decoration: none;
+  color: #222;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  font-family: 'M PLUS Rounded 1c', sans-serif; /* 丸みのあるスタイリッシュフォント */
+}
+
+/* ホバーで浮かせる */
+.tool-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+  border-color: #3d61a9; /* アクセント色 */
+}
+
+/* カード内見出し */
+.tool-card h2 {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+  color: #3d61a9; /* メインカラーに寄せる */
+}
+
+/* カード内テキスト */
+.tool-card p {
+  font-size: 0.95em;
+  color: #555;
+  line-height: 1.4em;
+}
