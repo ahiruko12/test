@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>小説風ログ整形ツール</title>
+<link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
+<link id="switchable-style" rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="darkmode.css">
+</head>
+<body>
+
+<div class="header-container">
+  <a href="../" class="top-button">戻る</a>
+  <h2>ココフォリアログ整形 - 小説風</h2>
+
+<!-- ===== セクション1: ファイル設定 ===== -->
+<div class="section" id="section-file-meta">
+  <div id="fileInputArea" class="flex-row">
+    <input type="file" id="fileInput" accept=".html">
+  </div>
+
+<div id="metaEditor">
+  <label>ログタイトル：<input type="text" id="titleInput"></label>
+  <label>
+    書き出しファイル名：
+    <input type="text" id="filenameInput">
+    <span class="html-ext">.html</span>
+  </label>
+  <button id="exportBtn">HTML書き出し</button>
+</div>
+
+</div>
+
+<!-- ===== セクション2: 登場人物欄 ===== -->
+<div class="section" id="section-cast-editor" style="display:none;">
+  <h3>登場人物欄</h3>
+  <label><input type="checkbox" id="castToggle"> 登場人物欄を追加する</label>
+
+  <div id="castHeadingArea" style="display:none; margin-top:8px;">
+    <label>登場人物欄見出し：
+      <select id="castHeadingSelect">
+        <option value="1">見出し1</option>
+        <option value="2" selected>見出し2</option>
+        <option value="3">見出し3</option>
+        <option value="4">見出し4</option>
+        <option value="5">見出し5</option>
+      </select>
+    </label>
+  </div>
+
+  <div id="castEditor" style="display:none; margin-top:10px;">
+    <div id="castListArea"></div>
+  </div>
+
+<hr>
+
+<div id="editors" style="display:flex; gap:12px; align-items:flex-start;">
+  <!-- キャラクター編集 -->
+  <div style="flex:1; min-width:250px; display:flex; flex-direction:column;">
+    <div style="display:flex; align-items:center; gap:40px; margin-bottom:6px;">
+      <h3 style="margin:0;">キャラクター編集</h3>
+      <button id="applyCharBtn">変更を適用</button>
+    </div>
+    <div id="charEditor" style="display:flex; flex-direction:column; gap:6px;"></div>
+  </div>
+
+  <!-- タブごとの表示設定 -->
+  <div style="flex:1; min-width:250px; display:flex; flex-direction:column;">
+    <h3 style="margin:0 0 6px 0;">タブごとの表示設定</h3>
+    <div id="channelEditor" style="display:flex; flex-direction:column; gap:6px;"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- ===== セクション3: 発言編集 & プレビュー ===== -->
+<div class="section" id="section-log-preview" style="display:none;">
+  <div id="container">
+    <!-- 左：発言編集 -->
+    <div id="logAreaContainer" style="flex:1; margin-right:10px;">
+      <div id="logArea"></div>
+    </div>
+
+    <!-- 右：プレビュー -->
+    <div id="previewContainer" style="flex:1; margin-left:10px;">
+      <iframe id="preview"></iframe>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="format.js"></script>
+<script>
+let messages = [];
+let logTitle = "整形済みログ";
+let exportFileName = "formatted_log";
+let channelStyles = {};
+let sortableInstance = null;
+let castList = [];
+let castEnabled = false;
+
+/* ================================
+   ファイル読み込み
+================================ */
+document.getElementById("fileInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  document.getElementById('metaEditor').style.display = 'flex';
+  document.getElementById("section-cast-editor").style.display = "block";
+  document.getElementById("section-log-preview").style.display = "block";
+
+  const baseName = file.name.replace(/\.html?$/i, "");
+  const defaultName = baseName + "_log";
+
+  document.getElementById("filenameInput").value = defaultName;
+
+  exportFileName = defaultName;
+
+  const reader = new FileReader();
+  reader.onload = () => parseLog(reader.result);
+  reader.readAsText(file, "utf-8");
+});
+
+/* ================================
+   ログ解析
+================================ */
+function parseLog(htmlText) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText, "text/html");
+
+  const titleTag = doc.querySelector("title");
+  logTitle = titleTag ? titleTag.textContent.trim() : "整形済みログ";
+  document.getElementById("titleInput").value = logTitle;
+
+  const ps = doc.querySelectorAll("p");
+  messages = [];
+
+  ps.forEach(p => {
+    const spans = p.querySelectorAll("span");
+    if (spans.length < 3) return;
+
+messages.push({
+  id: crypto.randomUUID(),
+  type: "talk",
+  channel: spans[0].textContent.replace("[","").replace("]","").replace(/\s+/g,"").trim(),
+  speaker: spans[1].textContent.replace(/\s+/g,"").trim(), // ここを修正
+  text: spans[2].innerHTML.trim(), // innerHTML のまま
+  color: p.style.color || "#000"
+});
+
+  });
+
+  // ここで channelStyles を初期化
+  messages.forEach(m => {
+    const ch = m.channel;
+    if (!channelStyles[ch]) {
+      channelStyles[ch] = { mode: ch==="main"?"main":"sub", bg:"#f5f5f5", border:"#ddd" };
+    }
+  });
+
+  buildChannelEditor(messages); // 初期化後に呼ぶ
+  renderEditor();              // その後に発言描画
+  renderCharEditor();
+  updatePreview();
+}
+
+/* ================================
+   タイトル・ファイル名編集
+================================ */
+document.getElementById("titleInput").addEventListener("input", e => {
+  logTitle = e.target.value;
+  updatePreview();
+});
+document.getElementById("filenameInput").addEventListener("input", e => {
+  exportFileName = e.target.value;
+});
+
+/* ================================
+   登場人物欄編集（見出し設定UI連動版）
+================================ */
+
+// 見出しレベル（デフォルト）
+let castHeadingLevel = 2;
+
+/* ================================
+   登場人物ON/OFF切り替え
+================================ */
+document.getElementById("castToggle").addEventListener("change", e => {
+
+  castEnabled = e.target.checked;
+
+  // 登場人物編集欄
+  document.getElementById("castEditor").style.display =
+    castEnabled ? "block" : "none";
+
+  // 見出し設定欄（追加で表示）
+  document.getElementById("castHeadingArea").style.display =
+    castEnabled ? "block" : "none";
+
+  // ONにした瞬間、空なら1行追加
+  if (castEnabled) {
+    if (castList.length === 0) addCast();
+    renderCastEditor();
+  }
+
+  updatePreview();
+});
+
+
+/* ================================
+   見出しレベル変更（即時反映）
+================================ */
+document.getElementById("castHeadingSelect")
+  .addEventListener("change", e => {
+
+    castHeadingLevel = Number(e.target.value);
+
+    updatePreview();
+});
+
+
+/* ================================
+   登場人物編集欄 描画
+================================ */
+function renderCastEditor() {
+
+  const area = document.getElementById("castListArea");
+  area.innerHTML = "";
+
+  castList.forEach((c, index) => {
+
+    const row = document.createElement("div");
+    row.className = "castRow";
+
+    row.innerHTML = `
+      <input class="castName" type="text"
+        value="${c.name}"
+        placeholder="名前">
+
+<input class="castImage" type="text"
+  value="${c.image}"
+  placeholder="画像URL（GoogleDrive）">
+
+<input class="castSheet" type="text"
+  value="${c.sheet}"
+  placeholder="キャラシURL">
+
+      <button type="button" class="upBtn">↑</button>
+      <button type="button" class="downBtn">↓</button>
+      <button type="button" class="delBtn">−</button>
+    `;
+
+    /* ============================
+       即時反映
+    ============================ */
+
+    row.querySelector(".castName").addEventListener("input", e => {
+      castList[index].name = e.target.value.trim();
+      updatePreview();
+    });
+
+row.querySelector(".castImage").addEventListener("input", e => {
+  castList[index].image = convertDriveImageUrl(e.target.value.trim());
+  updatePreview();
+});
+
+row.querySelector(".castSheet").addEventListener("input", e => {
+  castList[index].sheet = e.target.value.trim();
+  updatePreview();
+});
+
+    /* ============================
+       ↑↓移動
+    ============================ */
+
+    const upBtn = row.querySelector(".upBtn");
+    const downBtn = row.querySelector(".downBtn");
+
+    upBtn.disabled = (index === 0);
+    downBtn.disabled = (index === castList.length - 1);
+
+    upBtn.addEventListener("click", () => moveCast(index, -1));
+    downBtn.addEventListener("click", () => moveCast(index, 1));
+
+    /* ============================
+       −削除
+    ============================ */
+
+    const delBtn = row.querySelector(".delBtn");
+    delBtn.disabled = (castList.length === 1); // ←ここがポイント
+    delBtn.addEventListener("click", () => {
+      deleteCast(index);
+    });
+
+    area.appendChild(row);
+  });
+
+  /* ============================
+     最下部：＋追加ボタン
+  ============================ */
+
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.textContent = "＋追加";
+  addBtn.className = "addCastBtn";
+
+  addBtn.addEventListener("click", () => {
+    addCast();
+  });
+
+  area.appendChild(addBtn);
+}
+
+
+/* ================================
+   行追加
+================================ */
+function addCast() {
+
+castList.push({
+  name: "",
+  image: "",
+  sheet: ""
+});
+
+  renderCastEditor();
+  updatePreview();
+}
+
+
+/* ================================
+   行削除
+================================ */
+function deleteCast(index) {
+
+  castList.splice(index, 1);
+
+if (castList.length === 0) {
+  castList.push({ name:"", image:"", sheet:"" });
+}
+renderCastEditor();
+updatePreview();
+}
+
+/* ================================
+   ↑↓並び替え
+================================ */
+function moveCast(index, dir) {
+
+  const newIndex = index + dir;
+  if (newIndex < 0 || newIndex >= castList.length) return;
+
+  [castList[index], castList[newIndex]] =
+    [castList[newIndex], castList[index]];
+
+  renderCastEditor();
+  updatePreview();
+}
+
+/* ================================
+   画像追加
+================================ */
+function convertDriveImageUrl(url) {
+  if (!url) return "";
+
+  // Google Drive: file/d/.../view
+  let m = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+  if (m) {
+    return "https://lh3.googleusercontent.com/d/" + m[1];
+  }
+
+  // Google Drive: open?id=...
+  m = url.match(/[?&]id=([^&]+)/);
+  if (m) {
+    return "https://lh3.googleusercontent.com/d/" + m[1];
+  }
+
+  return url; // 通常URLは変換しない
+}
+
+
+/* ================================
+   speaker一覧取得
+================================ */
+function getSpeakerList() {
+  const map = new Map();
+  messages.forEach(m => { if (m.type === "talk") map.set(m.speaker, m.color); });
+  return [...map.entries()];
+}
+
+/* ================================
+   キャラクター一括編集
+================================ */
+function renderCharEditor() {
+  const editor = document.getElementById("charEditor");
+  editor.innerHTML = "";
+  const speakers = [...new Set(messages.map(m => m.speaker))];
+
+  speakers.forEach(name => {
+    const sample = messages.find(m => m.speaker === name);
+    let color = sample.color || "#000000";
+
+    // RGB形式をHEXに変換
+    if (color.startsWith("rgb")) {
+      const nums = color.match(/\d+/g);
+      if (nums && nums.length >= 3) {
+        color = "#" + nums.slice(0,3).map(n => Number(n).toString(16).padStart(2,"0")).join("");
+      }
+    }
+    if (!color.startsWith("#")) color = "#000000";
+
+    const row = document.createElement("div");
+    row.className = "charRow";
+
+    row.innerHTML = `
+      <span class="oldName">${name}</span>
+      <span class="nameArrow">→ 新しい名前：</span>
+      <input type="text" class="newName" value="${name}">
+      <span class="colorLabel">新しい色：</span>
+      <input type="color" class="newColor" value="${color}">
+    `;
+
+    editor.appendChild(row);
+  });
+}
+
+/* ================================
+   適用ボタン
+================================ */
+document.getElementById("applyCharBtn").addEventListener("click", () => {
+  const rows = document.querySelectorAll("#charEditor .charRow");
+  let nameMap = {}, colorMap = {};
+  rows.forEach(row => {
+    const oldName = row.querySelector(".oldName").textContent.trim();
+    nameMap[oldName] = row.querySelector(".newName").value;
+    colorMap[oldName] = row.querySelector(".newColor").value;
+  });
+  messages.forEach(msg => {
+    if (msg.speaker in nameMap) msg.speaker = nameMap[msg.speaker];
+    if (msg.speaker in colorMap) msg.color = colorMap[msg.speaker];
+  });
+  renderEditor();
+  renderCharEditor();
+  updatePreview();
+});
+
+
+/* ================================
+   タブごとの表示設定（修正版）
+================================ */
+function buildChannelEditor(messages) {
+  const editor = document.getElementById("channelEditor");
+  editor.innerHTML = "";
+
+  messages.forEach(m => {
+    const ch = m.channel.trim();
+    if (!channelStyles[ch]) {
+      channelStyles[ch] = { mode: ch === "main" ? "main" : "sub", bg: "#f5f5f5", border: "#ddd" };
+    }
+  });
+
+  Object.keys(channelStyles).forEach(ch => {
+    const style = channelStyles[ch];
+
+    const box = document.createElement("div");
+    box.className = "channelBox";
+    box.style.border = "1px solid #ccc";
+    box.style.padding = "8px";
+    box.style.marginBottom = "6px";
+    box.style.display = "flex";
+    box.style.alignItems = "center";
+    box.style.gap = "12px";
+
+    // 横並びで表示
+    box.innerHTML = `
+      <strong>${ch}</strong>
+      <span>
+        <label><input type="radio" name="mode-${ch}" value="main" ${style.mode==="main"?"checked":""}>メイン</label>
+        <label><input type="radio" name="mode-${ch}" value="sub" ${style.mode==="sub"?"checked":""}>サブ</label>
+      </span>
+      <span>背景色：<input type="color" data-channel="${ch}" class="bgInput"></span>
+      <span>枠色：<input type="color" data-channel="${ch}" class="borderInput"></span>
+    `;
+
+    editor.appendChild(box);
+
+    // 色の初期値
+    box.querySelector(".bgInput").value = style.bg;
+    box.querySelector(".borderInput").value = style.border;
+
+    // main は色選択無効
+    const disableColor = style.mode === "main";
+    box.querySelector(".bgInput").disabled = disableColor;
+    box.querySelector(".borderInput").disabled = disableColor;
+
+    // ラジオボタン変更で channelStyles を更新
+    box.querySelectorAll(`input[name="mode-${ch}"]`).forEach(radio => {
+      radio.addEventListener("change", e => {
+        channelStyles[ch].mode = e.target.value;
+        const disable = e.target.value === "main";
+        box.querySelector(".bgInput").disabled = disable;
+        box.querySelector(".borderInput").disabled = disable;
+        updatePreview();
+      });
+    });
+
+    // 色選択変更
+    box.querySelector(".bgInput").addEventListener("input", e => {
+      channelStyles[ch].bg = e.target.value;
+      updatePreview();
+    });
+    box.querySelector(".borderInput").addEventListener("input", e => {
+      channelStyles[ch].border = e.target.value;
+      updatePreview();
+    });
+  });
+}
+
+function getChannelList() {
+  // channelStyles のキー順で返す
+  return Object.keys(channelStyles);
+}
+
+
+/* ================================
+   発言編集エリア描画
+================================ */
+function renderEditor() {
+  const area = document.getElementById("logArea");
+  area.innerHTML = "";
+
+messages.forEach(msg => {
+  const div = document.createElement("div");
+  div.className = "msg";
+  div.dataset.id = msg.id;
+
+  // 空白・線・区切り・見出しを薄グレーに
+  if (["space", "hr", "heading"].includes(msg.type)) {
+    div.style.background = "#f0f0f0"; // 薄いグレー
+    div.style.padding = "4px 6px";
+    div.style.borderRadius = "4px";
+  }
+
+  if(msg.type==="talk"){
+    const channels = getChannelList();
+    div.innerHTML = `
+      <div style="display:flex; gap:6px; align-items:center;">
+        <strong style="color:${msg.color}">${msg.speaker}</strong> ：
+        <select class="channelSelect" data-id="${msg.id}">
+          ${channels.map(ch=>`<option value="${ch}" ${msg.channel===ch?"selected":""}>${ch}</option>`).join("")}
+        </select>
+      </div>
+      <textarea data-id="${msg.id}">${msg.text}</textarea>
+      ${makeButtonRow(msg.id)}
+    `;
+  } else if(msg.type==="space"){ 
+    div.innerHTML=`<em>（空白）</em>${makeButtonRow(msg.id)}`; 
+  }
+  else if(msg.type==="hr"){ 
+    div.innerHTML=`<em>（区切り線）</em>${makeButtonRow(msg.id)}`; 
+  }
+else if(msg.type==="heading"){
+  div.innerHTML = `
+    <div class="headingRow">
+      <strong>見出し：</strong>
+      <select class="headingLevel" data-id="${msg.id}">
+        ${[1,2,3,4,5].map(n=>`<option value="${n}" ${(msg.level||2)===n?"selected":""}>見出し${n}</option>`).join("")}
+      </select>
+    </div>
+    <textarea class="headingText" data-id="${msg.id}">${msg.text}</textarea>
+    ${makeButtonRow(msg.id)}
+  `;
+}
+  area.appendChild(div);
+});
+
+  // チャンネル選択イベント
+  area.querySelectorAll(".channelSelect").forEach(sel=>{
+    sel.addEventListener("change", e=>{
+      const id = e.target.dataset.id;
+      const target = messages.find(m=>m.id===id);
+      if(target){ target.channel = e.target.value; updatePreview(); }
+    });
+  });
+
+  // textarea入力イベント
+  area.querySelectorAll("textarea").forEach(ta=>{
+    ta.addEventListener("input", e=>{
+      const id = e.target.dataset.id;
+      const target = messages.find(m=>m.id===id);
+      if(target){ target.text = e.target.value; updatePreview(); }
+    });
+  });
+
+  // headingレベル変更
+  area.querySelectorAll(".headingLevel").forEach(sel=>{
+    sel.addEventListener("change", e=>{
+      const id = e.target.dataset.id;
+      const target = messages.find(m=>m.id===id);
+      if(target){ target.level = Number(e.target.value); updatePreview(); }
+    });
+  });
+
+  // Sortable
+  if(!sortableInstance){
+    sortableInstance = new Sortable(area,{animation:150,onEnd:evt=>{
+      const moved=messages.splice(evt.oldIndex,1)[0];
+      messages.splice(evt.newIndex,0,moved);
+      updatePreview();
+    }});
+  }
+}
+
+/* ================================
+   ボタン行作成
+================================ */
+function makeButtonRow(id){
+  return `<div class="btnRow">
+    <select onchange="addTalkWithSpeaker('${id}', this.value)">
+      <option value="">＋発言</option>
+      ${getSpeakerList().map(([name])=>`<option value="${name}">${name}</option>`).join("")}
+    </select>
+    <button onclick="addSpace('${id}')">＋空白</button>
+    <button onclick="addHr('${id}')">＋線</button>
+    <button onclick="addHeading('${id}')">＋見出し</button>
+    <button onclick="deleteMsg('${id}')">−削除</button>
+  </div>`;
+}
+
+/* ================================
+   発言追加・削除
+================================ */
+function findIndexById(id){ return messages.findIndex(m=>m.id===id); }
+
+function addTalkWithSpeaker(id,speakerName){
+  if(!speakerName) return;
+  const idx=findIndexById(id);
+  const found=getSpeakerList().find(([name])=>name===speakerName);
+  const color=found?found[1]:"#000000";
+  const baseChannel = messages[idx]?.channel || "main";
+  messages.splice(idx+1,0,{id:crypto.randomUUID(),type:"talk",channel:baseChannel,speaker:speakerName,text:"",color:color});
+  renderEditor(); updatePreview();
+}
+
+function addSpace(id){ const idx=findIndexById(id); messages.splice(idx+1,0,{id:crypto.randomUUID(),type:"space"}); renderEditor(); updatePreview(); }
+function addHr(id){ const idx=findIndexById(id); messages.splice(idx+1,0,{id:crypto.randomUUID(),type:"hr"}); renderEditor(); updatePreview(); }
+function addHeading(id){ const idx=findIndexById(id); messages.splice(idx+1,0,{id:crypto.randomUUID(),type:"heading",level:2,text:"見出し"}); renderEditor(); updatePreview(); }
+function deleteMsg(id){ const idx=findIndexById(id); messages.splice(idx,1); renderEditor(); updatePreview(); }
+
+/* ================================
+   プレビュー更新
+================================ */
+let previewTimer = null;
+let lastHtml = "";
+function updatePreview() {
+  const iframe = document.getElementById("preview");
+  if (!iframe) return;
+
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => {
+
+    const html = Format.buildHtml(
+      messages,
+      logTitle,
+      channelStyles,
+      castEnabled ? castList : [],
+      castHeadingLevel
+    );
+
+    // 前回と同じなら再描画しない
+    if (html === lastHtml) return;
+    lastHtml = html;
+
+    // iframeの書き換え
+    if (iframe.srcdoc !== html) {
+      const scrollY = iframe.contentWindow.scrollY || 0;
+      iframe.srcdoc = html;
+      iframe.onload = () => {
+        iframe.contentWindow.scrollTo(0, scrollY);
+        iframe.onload = null;
+      };
+    }
+
+  }, 50); // 100ms → 50msに短縮して反応を改善
+}
+
+/* ================================
+   HTML書き出し
+================================ */
+document.getElementById("exportBtn").addEventListener("click",()=>{
+  const output = Format.buildHtml(
+    messages,
+    logTitle,
+    channelStyles,
+    castEnabled ? castList : [],
+    castHeadingLevel
+  );
+  const safeName=exportFileName.trim()||"formatted_log";
+  const fullName=safeName+".html";
+  const blob=new Blob([output],{type:"text/html"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=fullName;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+
+</body>
+</html>
