@@ -29,6 +29,35 @@
   <button id="exportBtn">HTML書き出し</button>
 </div>
 
+  <div id="themeEditor" style="margin-top:15px; display:flex; gap:25px; flex-wrap:wrap;">
+
+  <!-- ログ背景 -->
+  <div>
+    <strong>[ログ背景]</strong><br>
+
+    <label>
+      <input type="radio" name="bgMode" value="color" checked>
+      色
+    </label>
+    <input type="color" id="bgColorInput" value="#ffffff">
+
+    <label style="margin-left:10px;">
+      <input type="radio" name="bgMode" value="image">
+      画像
+    </label>
+    <input type="text" id="bgImageInput"
+      placeholder="GoogleDrive画像URL"
+      style="display:none; width:250px;">
+  </div>
+
+  <!-- 装飾色 -->
+  <div>
+    <strong>[装飾色]</strong><br>
+    <input type="color" id="accentColorInput" value="#000000">
+  </div>
+
+</div>
+  
 </div>
 
 <!-- ===== セクション2: 登場人物欄 ===== -->
@@ -92,6 +121,10 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="format.js"></script>
 <script>
+let bgMode = "color";
+let bgColor = "#ffffff";
+let bgImageUrl = "";
+let accentColor = "#000000";
 let messages = [];
 let logTitle = "整形済みログ";
 let exportFileName = "formatted_log";
@@ -177,6 +210,43 @@ document.getElementById("filenameInput").addEventListener("input", e => {
   exportFileName = e.target.value;
 });
 
+/* ================================
+   背景・装飾色編集
+================================ */
+
+// 背景モード切替
+document.querySelectorAll("input[name='bgMode']").forEach(r=>{
+  r.addEventListener("change", e=>{
+    bgMode = e.target.value;
+
+    document.getElementById("bgColorInput").style.display =
+      bgMode==="color" ? "inline-block" : "none";
+
+    document.getElementById("bgImageInput").style.display =
+      bgMode==="image" ? "inline-block" : "none";
+
+    updatePreview();
+  });
+});
+
+// 背景色
+document.getElementById("bgColorInput").addEventListener("input", e=>{
+  bgColor = e.target.value;
+  updatePreview();
+});
+
+// 背景画像
+document.getElementById("bgImageInput").addEventListener("input", e=>{
+  bgImageUrl = convertDriveImageUrl(e.target.value.trim());
+  updatePreview();
+});
+
+// 装飾色
+document.getElementById("accentColorInput").addEventListener("input", e=>{
+  accentColor = e.target.value;
+  updatePreview();
+});
+  
 /* ================================
    登場人物欄編集（見出し設定UI連動版）
 ================================ */
@@ -666,7 +736,11 @@ function updatePreview() {
       logTitle,
       channelStyles,
       castEnabled ? castList : [],
-      castHeadingLevel
+      castHeadingLevel ,
+bgMode,
+bgColor,
+bgImageUrl,
+accentColor
     );
 
     // 前回と同じなら再描画しない
@@ -711,3 +785,4 @@ document.getElementById("exportBtn").addEventListener("click",()=>{
 
 </body>
 </html>
+
