@@ -12,7 +12,8 @@
 <div class="header-container">
   <a href="../" class="top-button">戻る</a>
   <h2>ココフォリアログ整形 - 小説風</h2>
-
+</div>
+  
 <!-- ===== セクション1: ファイル設定 ===== -->
 <div class="section" id="section-file-meta">
   <div id="fileInputArea" class="flex-row">
@@ -178,8 +179,8 @@ messages.push({
   id: crypto.randomUUID(),
   type: "talk",
   channel: spans[0].textContent.replace("[","").replace("]","").replace(/\s+/g,"").trim(),
-  speaker: spans[1].textContent.trim()
-  text: spans[2].innerHTML.trim(), // innerHTML のまま
+  speaker: spans[1].textContent.trim(),
+  text: spans[2].innerHTML.trim(),
   color: p.style.color || "#000"
 });
 
@@ -789,6 +790,7 @@ document.getElementById("exportBtn").addEventListener("click",()=>{
 
 </body>
 </html>
+
 
 
 
