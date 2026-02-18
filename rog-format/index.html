@@ -30,41 +30,15 @@
   <button id="exportBtn">HTML書き出し</button>
 </div>
 
-  <div id="themeEditor" style="margin-top:15px; display:flex; gap:25px; flex-wrap:wrap;">
-
-  <!-- ログ背景 -->
-  <div>
-    <strong>[ログ背景]</strong><br>
-
-    <label>
-      <input type="radio" name="bgMode" value="color" checked>
-      色
-    </label>
-    <input type="color" id="bgColorInput" value="#ffffff">
-
-    <label style="margin-left:10px;">
-      <input type="radio" name="bgMode" value="image">
-      画像
-    </label>
-    <input type="text" id="bgImageInput"
-      placeholder="GoogleDrive画像URL"
-      style="display:none; width:250px;">
-  </div>
-
-  <!-- 装飾色 -->
-  <div>
-    <strong>[装飾色]</strong><br>
-    <input type="color" id="accentColorInput" value="#000000">
-  </div>
-
-</div>
-  
 </div>
 
 <!-- ===== セクション2: 登場人物欄 ===== -->
 <div class="section" id="section-cast-editor" style="display:none;">
-  <h3>登場人物欄</h3>
-  <label><input type="checkbox" id="castToggle"> 登場人物欄を追加する</label>
+  <div style="display:flex; gap:40px; align-items:flex-start; margin-bottom:12px;">
+
+    <div style="flex:1;">
+      <h3>登場人物欄</h3>
+      <label><input type="checkbox" id="castToggle"> 登場人物欄を追加する</label>
 
   <div id="castHeadingArea" style="display:none; margin-top:8px;">
     <label>登場人物欄見出し：
@@ -78,8 +52,32 @@
     </label>
   </div>
 
-  <div id="castEditor" style="display:none; margin-top:10px;">
-    <div id="castListArea"></div>
+      <div id="castEditor" style="display:none; margin-top:10px;">
+        <div id="castListArea"></div>
+      </div>
+    </div>
+
+    <div style="flex:1;">
+      <h3>全体図案</h3>
+
+       <div id="bgEditor" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px;">
+        <strong>背景：</strong>
+        <label>
+          <input type="radio" name="bgMode" value="color" checked>
+          色
+        </label>
+        <input type="color" id="bgColorBox" value="#ffffff"> <!-- 初期値白 -->
+        <label>
+          <input type="radio" name="bgMode" value="image">
+          画像
+        </label>
+        <input type="text" id="bgImageUrl" placeholder="GoogleDrive画像URL">
+
+        <strong class="accent-label">装飾色：</strong>
+        <input type="color" id="accentColorBox" class="accent-input">
+      </div>
+    </div>
+
   </div>
 
 <hr>
@@ -142,6 +140,8 @@ document.getElementById("fileInput").addEventListener("change", e => {
   if (!file) return;
 
   document.getElementById('metaEditor').style.display = 'flex';
+  document.getElementById("bgEditor").style.display="flex";
+  updateBgUi();
   document.getElementById("section-cast-editor").style.display = "block";
   document.getElementById("section-log-preview").style.display = "block";
 
@@ -161,6 +161,10 @@ document.getElementById("fileInput").addEventListener("change", e => {
    ログ解析
 ================================ */
 function parseLog(htmlText) {
+  messages = [];
+  channelStyles = {};
+  castList = [];
+
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlText, "text/html");
 
@@ -169,7 +173,6 @@ function parseLog(htmlText) {
   document.getElementById("titleInput").value = logTitle;
 
   const ps = doc.querySelectorAll("p");
-  messages = [];
 
   ps.forEach(p => {
     const spans = p.querySelectorAll("span");
@@ -215,39 +218,46 @@ document.getElementById("filenameInput").addEventListener("input", e => {
    背景・装飾色編集
 ================================ */
 
+function updateBgUi() {
+  document.getElementById("bgColorBox").style.display =
+    bgMode === "color" ? "inline-block" : "none";
+
+  document.getElementById("bgImageUrl").style.display =
+    bgMode === "image" ? "inline-block" : "none";
+
+  document.getElementById("bgColorBox").value = bgColor;
+  document.getElementById("accentColorBox").value = accentColor;
+}
+
 // 背景モード切替
 document.querySelectorAll("input[name='bgMode']").forEach(r=>{
   r.addEventListener("change", e=>{
     bgMode = e.target.value;
-
-    document.getElementById("bgColorInput").style.display =
-      bgMode==="color" ? "inline-block" : "none";
-
-    document.getElementById("bgImageInput").style.display =
-      bgMode==="image" ? "inline-block" : "none";
-
+    updateBgUi();
     updatePreview();
   });
 });
 
 // 背景色
-document.getElementById("bgColorInput").addEventListener("input", e=>{
+document.getElementById("bgColorBox").addEventListener("input", e=>{
   bgColor = e.target.value;
   updatePreview();
 });
 
 // 背景画像
-document.getElementById("bgImageInput").addEventListener("input", e=>{
+document.getElementById("bgImageUrl").addEventListener("input", e=>{
   bgImageUrl = convertDriveImageUrl(e.target.value.trim());
   updatePreview();
 });
 
 // 装飾色
-document.getElementById("accentColorInput").addEventListener("input", e=>{
+document.getElementById("accentColorBox").addEventListener("input", e=>{
   accentColor = e.target.value;
   updatePreview();
 });
   
+updateBgUi();
+
 /* ================================
    登場人物欄編集（見出し設定UI連動版）
 ================================ */
@@ -605,14 +615,8 @@ function renderEditor() {
 messages.forEach(msg => {
   const div = document.createElement("div");
   div.className = "msg";
+  div.classList.add("type-" + msg.type);
   div.dataset.id = msg.id;
-
-  // 空白・線・区切り・見出しを薄グレーに
-  if (["space", "hr", "heading"].includes(msg.type)) {
-    div.style.background = "#f0f0f0"; // 薄いグレー
-    div.style.padding = "4px 6px";
-    div.style.borderRadius = "4px";
-  }
 
   if(msg.type==="talk"){
     const channels = getChannelList();
@@ -641,6 +645,15 @@ else if(msg.type==="heading"){
       </select>
     </div>
     <textarea class="headingText" data-id="${msg.id}">${msg.text}</textarea>
+    ${makeButtonRow(msg.id)}
+  `;
+}
+else if(msg.type==="still"){
+  div.innerHTML = `
+    <strong>スチル画像：</strong>
+    <input class="stillInput" data-id="${msg.id}"
+      placeholder="GoogleDrive画像URL"
+      value="${msg.url||""}">
     ${makeButtonRow(msg.id)}
   `;
 }
@@ -674,6 +687,17 @@ else if(msg.type==="heading"){
     });
   });
 
+area.querySelectorAll(".stillInput").forEach(inp=>{
+  inp.addEventListener("input", e=>{
+    const id=e.target.dataset.id;
+    const target=messages.find(m=>m.id===id);
+    if(target){
+      target.url=convertDriveImageUrl(e.target.value.trim());
+      updatePreview();
+    }
+  });
+});
+
   // Sortable
   if(!sortableInstance){
     sortableInstance = new Sortable(area,{animation:150,onEnd:evt=>{
@@ -696,6 +720,7 @@ function makeButtonRow(id){
     <button onclick="addSpace('${id}')">＋空白</button>
     <button onclick="addHr('${id}')">＋線</button>
     <button onclick="addHeading('${id}')">＋見出し</button>
+    <button onclick="addStill('${id}')">＋スチル</button>
     <button onclick="deleteMsg('${id}')">−削除</button>
   </div>`;
 }
@@ -718,6 +743,18 @@ function addTalkWithSpeaker(id,speakerName){
 function addSpace(id){ const idx=findIndexById(id); messages.splice(idx+1,0,{id:crypto.randomUUID(),type:"space"}); renderEditor(); updatePreview(); }
 function addHr(id){ const idx=findIndexById(id); messages.splice(idx+1,0,{id:crypto.randomUUID(),type:"hr"}); renderEditor(); updatePreview(); }
 function addHeading(id){ const idx=findIndexById(id); messages.splice(idx+1,0,{id:crypto.randomUUID(),type:"heading",level:2,text:"見出し"}); renderEditor(); updatePreview(); }
+
+function addStill(id){
+  const idx=findIndexById(id);
+  messages.splice(idx+1,0,{
+    id:crypto.randomUUID(),
+    type:"still",
+    url:""
+  });
+  renderEditor();
+  updatePreview();
+}
+
 function deleteMsg(id){ const idx=findIndexById(id); messages.splice(idx,1); renderEditor(); updatePreview(); }
 
 /* ================================
@@ -790,7 +827,3 @@ document.getElementById("exportBtn").addEventListener("click",()=>{
 
 </body>
 </html>
-
-
-
-

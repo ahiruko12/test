@@ -1,67 +1,66 @@
 const Format = {
-  buildHtml(
-  messages,
-  title="整形済みログ",
-  channelStyles={},
-  castList=[],
-  castHeadingLevel=2,
-  bgMode="color",
-  bgColor="#fff",
-  bgImageUrl="",
-  accentColor="#000"
-){
+  buildHtml(messages,title="整形済みログ",channelStyles={},castList=[],castHeadingLevel=2,bgMode="color",bgColor="#fff",bgImageUrl="",accentColor="#000"){
 
-  function hexToRgba(hex, alpha){
-    hex = hex.replace("#","");
-
-    if(hex.length===3){
-      hex = hex.split("").map(c=>c+c).join("");
-    }
-
+  function hexToRgba(hex, alpha){hex = hex.replace("#","");if(hex.length===3){hex = hex.split("").map(c=>c+c).join("");}
     const r = parseInt(hex.slice(0,2),16);
     const g = parseInt(hex.slice(2,4),16);
     const b = parseInt(hex.slice(4,6),16);
-
     return `rgba(${r},${g},${b},${alpha})`;
   }
+const lineColor = hexToRgba(accentColor, 0.45),
+      linkColor = hexToRgba(accentColor, 0.65);
 
-  // accentColor から薄いライン色を生成
-  const lineColor = hexToRgba(accentColor, 0.45);
-    
-    let charIdCounter = 0;
-    const charClassMap = {};
-    const charColors={};
+const bgLayerStyle=
+  bgMode==="image"&&bgImageUrl.trim()
+    ? `background:url(${bgImageUrl}) no-repeat center/cover;`
+    : `background:${bgColor};`;
 
-    messages.forEach(m=>{
-      if(m.type==="talk" && !charColors[m.speaker]){
-        charColors[m.speaker] = m.color || "#000";
-        const base = m.speaker.trim().replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_-]/g,"_") || "unk";
-        charIdCounter++;
-        charClassMap[m.speaker] = "char-" + base + "-" + charIdCounter;
-      }
-    });
-    let charCss="<style>\n";
-    Object.entries(charColors).forEach(([n,c])=>{
-      const sn = charClassMap[n];
-      charCss += `.${sn} dt,.${sn} dd{color:${c};}\n`;
-    });
-    Object.entries(channelStyles).forEach(([ch, st])=>{
-      if(st.mode==="sub"){
-        const safeCh = "sub-" + ch.replace(/[^\w]/g,"_");
-        charCss += `.${safeCh} { background: ${st.bg}; border: 1px solid ${st.border}; }\n`;
-      }
-    });
+const tocBg=
+  bgMode==="color"
+    ? bgColor
+    : `url(${bgImageUrl}) no-repeat center/cover`;
+
+let charIdCounter=0;
+const charClassMap={},
+      charColors={};
+
+messages.forEach(m=>{
+  if(m.type!=="talk"||charColors[m.speaker]) return;
+
+  charColors[m.speaker]=m.color||"#000";
+  const base=m.speaker.trim()
+    .replace(/\s+/g,"_")
+    .replace(/[^a-zA-Z0-9_-]/g,"_")||"unk";
+
+  charClassMap[m.speaker]="char-"+base+"-"+(++charIdCounter);
+});
+
+let charCss="<style>\n";
+
+Object.entries(charColors).forEach(([n,c])=>{
+  const sn=charClassMap[n];
+  charCss+=`.${sn} dt,.${sn} dd{color:${c};}\n`;
+});
+
+Object.entries(channelStyles).forEach(([ch,st])=>{
+  if(st.mode!=="sub") return;
+  const safeCh="sub-"+ch.replace(/[^\w]/g,"_");
+  charCss+=`.${safeCh}{background:${st.bg};border:1px solid ${st.border};}\n`;
+});
 
     charCss+=`
       .subTalk{margin-left:100px;font-size:0.8em;padding:20px 30px;border-radius:4px;}
-      body{font-family:"Yu Mincho",serif;margin: 40px 40px 40px 30px;background: ${bgMode==="color" ? bgColor : `url(${bgImageUrl}) no-repeat center/cover`};}
+      body{font-family:"Yu Mincho",serif;margin: 40px 40px 40px 30px;background:none;}
+      #bgLayer{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;}
       h1,h2,h3,h4,h5,h6{color:${accentColor};}
       dl{margin-bottom:15px;} dt{font-weight:bold;font-size:0.9em;} dd{margin-left:1em;padding:6px 0;}
       .mainTalk dd{margin-left:1em;padding:6px 0;}
-      #castBox{margin:20px 0;} .castItem{margin-bottom:12px;} .castItem dt{font-weight:bold;font-size:0.9em;}
-      .castItem dd{margin-left:1em;padding:4px 0;} .castItem a{color:gray;text-decoration:underline;}
+      #castBox{margin:20px 0;} .castItem{margin-bottom:12px;} .castItem dt{font-weight:bold;font-size:0.9em;color:${accentColor};}
+      .castItem dd{margin-left:1em;padding:4px 0;} .castItem a{color:${linkColor};text-decoration:underline;}
       .castOutputHr{border:none;margin:40px 0;border-top:1px solid ${lineColor};}
       hr{border:none;border-top:1px solid ${lineColor};}
+      .stillBlock{margin:25px 0;text-align:center;}
+      .stillImg{max-width:100%;height:auto;max-height:80vh;display:block;margin:0 auto;}
       #tocContainer{position:fixed;top:20px;right:30px;z-index:9999;}
       .menu-btn{width:50px;height:50px;background:none;border:none;cursor:pointer;padding:0;opacity:0.5;
         position:relative;display:inline-flex;align-items:center;justify-content:center;}
@@ -72,12 +71,14 @@ const Format = {
       .menu-btn.is-open .line:nth-of-type(1){top:50%;transform:translateY(-50%) rotate(45deg);}
       .menu-btn.is-open .line:nth-of-type(2){opacity:0;}
       .menu-btn.is-open .line:nth-of-type(3){top:50%;transform:translateY(-50%) rotate(-45deg);bottom:auto;}
-      .menu{position:absolute;top:50px;right:-280px;width:240px;max-height:85vh;background:#fff;border:1px solid #ccc;
+      .menu{position:absolute;top:50px;right:-280px;width:240px;max-height:85vh;background: ${tocBg};border:1px solid ${lineColor};
         padding:20px;overflow-y:auto;transition:right 0.25s,opacity 0.25s,transform 0.25s;pointer-events:none;opacity:0;transform:translateY(-10px);}
       .menu.is-open{right:0;pointer-events:auto;opacity:1;transform:translateY(0);}
       #tocContent ul{padding-left:0;} #tocContent li{list-style:none;margin:6px 0;}
       #tocContent a{text-decoration:none;color:${accentColor};} #tocContent a:hover{text-decoration:underline;}
-      #tocContent label{display:block;margin-bottom:4px;} #main{margin:15px;}
+      #tocContent label{display:block;margin-bottom:4px;color:${accentColor};font-size:0.9em;}
+      #tocContent input[type="checkbox"]{accent-color:${accentColor};}
+      #main{margin:15px;}
       .castItem.hasImage{display:flex;align-items:center;gap:12px;}
       .castImg{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid #ccc;}
       .castItem.hasImage .castTextBox{transform:translate(20px,-4px);}
@@ -106,6 +107,7 @@ messages.forEach(m=>{
   if(m.type==="space"){if(openSub){content+="</dl>\n";openSub=false;}content+="<br>\n";return;}
   if(m.type==="hr"){if(openSub){content+="</dl>\n";openSub=false;}content+="<hr>\n";return;}
   if(m.type==="heading"){if(openSub){content+="</dl>\n";openSub=false;}const l=m.level||2,hid="head_"+m.id;headings.push({id:hid,text:m.text,level:l});content+=`<h${l} id="${hid}">${m.text}</h${l}>\n`;return;}
+  if(m.type==="still"){if(openSub){content+="</dl>\n";openSub=false;}content += `<div class="stillBlock"><img src="${m.url}" class="stillImg"></div>`;return;}
   if(m.type!=="talk") return;
   const charClass=charClassMap[m.speaker];
   const st=channelStyles[m.channel]||{mode:m.channel==="main"?"main":"sub",bg:"#f5f5f5",border:"#ddd"};
@@ -133,6 +135,7 @@ return `<!doctype html>
 ${charCss}
 </head>
 <body>
+<div id="bgLayer" style="${bgLayerStyle}"></div>
 ${tocHtml}
 <div id="main"><h1>${title}</h1>${castHtml}${content}</div>
 
@@ -195,5 +198,4 @@ if(groupTalkCheckbox)groupTalkCheckbox.addEventListener("change",refreshView);
 
 </body></html>`;
   }
-
 }; 

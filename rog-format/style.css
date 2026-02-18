@@ -154,9 +154,9 @@ a:active { color: #3d61a9; }
   box-sizing: border-box;
 }
 
-.castRow input.castName { flex: 3 1 120px; }
-.castRow input.castImage { flex: 2 1 200px; }
-.castRow input.castSheet { flex: 2 1 200px; }
+.castRow input.castName { flex: 2 1 200px; }
+.castRow input.castImage { flex: 3 1 200px; }
+.castRow input.castSheet { flex: 3 1 200px; }
 
 /* ↑↓−ボタン */
 .castRow button, .btnRow button {
@@ -192,6 +192,13 @@ a:active { color: #3d61a9; }
 .addCastBtn:hover {
   background-color: #3d61a9;
   color: #e0e0e0;
+}
+
+/* ===================== */
+/* ログ背景・装飾色 */
+
+.accent-label{
+  margin-left: 40px; /* 好きな余白に変更 */
 }
 
 /* ===================== */
@@ -327,10 +334,13 @@ a:active { color: #3d61a9; }
 }
 
 /* 区切り・空白・見出し */
-.msg.type-space, .msg.type-hr, .msg.type-heading {
-  background: #f7f7f7;
-  padding: 8px;
-  border-radius: 6px;
+.msg.type-space,
+.msg.type-hr,
+.msg.type-heading,
+.msg.type-still {
+  background: #f0f0f0;
+  padding: 4px 6px;
+  border-radius: 4px;
 }
 
 /* 発言ヘッダー（スピーカー＋チャンネル） */
