@@ -737,10 +737,10 @@ function updatePreview() {
       channelStyles,
       castEnabled ? castList : [],
       castHeadingLevel ,
-bgMode,
-bgColor,
-bgImageUrl,
-accentColor
+      bgMode,
+      bgColor,
+      bgImageUrl,
+      accentColor
     );
 
     // 前回と同じなら再描画しない
@@ -769,7 +769,11 @@ document.getElementById("exportBtn").addEventListener("click",()=>{
     logTitle,
     channelStyles,
     castEnabled ? castList : [],
-    castHeadingLevel
+    castHeadingLevel,
+    bgMode,
+    bgColor,
+    bgImageUrl,
+    accentColor
   );
   const safeName=exportFileName.trim()||"formatted_log";
   const fullName=safeName+".html";
@@ -785,4 +789,5 @@ document.getElementById("exportBtn").addEventListener("click",()=>{
 
 </body>
 </html>
+
 
