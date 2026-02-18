@@ -178,7 +178,7 @@ messages.push({
   id: crypto.randomUUID(),
   type: "talk",
   channel: spans[0].textContent.replace("[","").replace("]","").replace(/\s+/g,"").trim(),
-  speaker: spans[1].textContent.replace(/\s+/g,"").trim(), // ここを修正
+  speaker: spans[1].textContent.trim()
   text: spans[2].innerHTML.trim(), // innerHTML のまま
   color: p.style.color || "#000"
 });
@@ -789,5 +789,6 @@ document.getElementById("exportBtn").addEventListener("click",()=>{
 
 </body>
 </html>
+
 
 
