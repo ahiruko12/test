@@ -1,6 +1,33 @@
 const Format = {
-  buildHtml(messages, title="整形済みログ", channelStyles={}, castList=[], castHeadingLevel=2, lineColor="#777"){
+  buildHtml(
+  messages,
+  title="整形済みログ",
+  channelStyles={},
+  castList=[],
+  castHeadingLevel=2,
+  bgMode="color",
+  bgColor="#fff",
+  bgImageUrl="",
+  accentColor="#000"
+){
 
+  function hexToRgba(hex, alpha){
+    hex = hex.replace("#","");
+
+    if(hex.length===3){
+      hex = hex.split("").map(c=>c+c).join("");
+    }
+
+    const r = parseInt(hex.slice(0,2),16);
+    const g = parseInt(hex.slice(2,4),16);
+    const b = parseInt(hex.slice(4,6),16);
+
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  // accentColor から薄いライン色を生成
+  const lineColor = hexToRgba(accentColor, 0.45);
+    
     let charIdCounter = 0;
     const charClassMap = {};
     const charColors={};
@@ -27,7 +54,8 @@ const Format = {
 
     charCss+=`
       .subTalk{margin-left:100px;font-size:0.8em;padding:20px 30px;border-radius:4px;}
-      body{font-family:"Yu Mincho",serif;margin: 40px 40px 40px 30px;}
+      body{font-family:"Yu Mincho",serif;margin: 40px 40px 40px 30px;background: ${bgMode==="color" ? bgColor : `url(${bgImageUrl}) no-repeat center/cover`};}
+      h1,h2,h3,h4,h5,h6{color:${accentColor};}
       dl{margin-bottom:15px;} dt{font-weight:bold;font-size:0.9em;} dd{margin-left:1em;padding:6px 0;}
       .mainTalk dd{margin-left:1em;padding:6px 0;}
       #castBox{margin:20px 0;} .castItem{margin-bottom:12px;} .castItem dt{font-weight:bold;font-size:0.9em;}
@@ -38,7 +66,7 @@ const Format = {
       .menu-btn{width:50px;height:50px;background:none;border:none;cursor:pointer;padding:0;opacity:0.5;
         position:relative;display:inline-flex;align-items:center;justify-content:center;}
       .inn{position:relative;width:30px;height:24px;display:inline-block;}
-      .line{position:absolute;left:0;width:100%;height:2px;background:#000;transition:0.3s;}
+      .line{position:absolute;left:0;width:100%;height:2px;background:${accentColor};transition:0.3s;}
       .line:nth-of-type(1){top:0;} .line:nth-of-type(2){top:50%;transform:translateY(-50%);}
       .line:nth-of-type(3){bottom:0;}
       .menu-btn.is-open .line:nth-of-type(1){top:50%;transform:translateY(-50%) rotate(45deg);}
@@ -48,7 +76,7 @@ const Format = {
         padding:20px;overflow-y:auto;transition:right 0.25s,opacity 0.25s,transform 0.25s;pointer-events:none;opacity:0;transform:translateY(-10px);}
       .menu.is-open{right:0;pointer-events:auto;opacity:1;transform:translateY(0);}
       #tocContent ul{padding-left:0;} #tocContent li{list-style:none;margin:6px 0;}
-      #tocContent a{text-decoration:none;color:black;} #tocContent a:hover{text-decoration:underline;}
+      #tocContent a{text-decoration:none;color:${accentColor};} #tocContent a:hover{text-decoration:underline;}
       #tocContent label{display:block;margin-bottom:4px;} #main{margin:15px;}
       .castItem.hasImage{display:flex;align-items:center;gap:12px;}
       .castImg{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid #ccc;}
@@ -167,4 +195,5 @@ if(groupTalkCheckbox)groupTalkCheckbox.addEventListener("change",refreshView);
 
 </body></html>`;
   }
+
 }; 
