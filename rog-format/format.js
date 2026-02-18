@@ -55,6 +55,7 @@ const Format = {
       .castItem.hasImage .castTextBox{transform:translate(20px,-4px);}
       .castItem.hasImage dd { margin-left: 0;padding-left: 0;}
       .castItem.hasImage dd a {display: inline-block;font-size: 0.8em;max-width: calc(70vw - 90px - 12px);white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+      @media (max-width:600px){body{margin:15px;}.subTalk{margin-left:20px;padding:12px;}}
     </style>\n`;
 
 let content = "", headings = [];let castHtml = "";
@@ -69,7 +70,7 @@ if(castList?.length){
     const sheetLink=c.sheet?.trim()?`<a href="${c.sheet}" target="_blank">${c.sheet}</a>`:"";
     castHtml+=`<dl class="castItem ${hasImage?"hasImage":"noImage"}">${imgHtml}<div class="castTextBox"><dt>${c.name||"（名前なし）"}</dt><dd>${sheetLink}</dd></div></dl>`;
   });
-  castHtml+=`<hr class="castOutputHr">`;
+  castHtml+=`</div><hr class="castOutputHr">`;
 }
 
 let openSub=false,lastChannel="";
@@ -97,7 +98,12 @@ if(headings.length){
 
 return `<!doctype html>
 <html lang="ja">
-<head><meta charset="utf-8"><title>${title}</title>${charCss}</head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title}</title>
+${charCss}
+</head>
 <body>
 ${tocHtml}
 <div id="main"><h1>${title}</h1>${castHtml}${content}</div>
