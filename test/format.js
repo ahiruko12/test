@@ -201,21 +201,32 @@ function applyGroupTalk(){
   });
 
   // サブトークDLまとめ（チャンネルごとに跨ぐ）
-  const subDLs = Array.from(mainContainer.querySelectorAll("dl.subTalk"));
-  let lastSubSpeaker=null, lastSubChannel=null, lastSubDL=null;
-  subDLs.forEach(dl=>{
-    const dt=dl.querySelector("dt"), dd=dl.querySelector("dd");
-    if(!dt||!dd) return;
-    const speaker=dt.textContent.trim(), channel=dl.dataset.channel;
-    const prev=dl.previousElementSibling;
-    if(prev && breakTags.includes(prev.tagName)){ lastSubSpeaker=null; lastSubChannel=null; lastSubDL=null; }
-    if(lastSubSpeaker===speaker && lastSubChannel===channel && lastSubDL){
-      lastSubDL.querySelector("dd").innerHTML += "<br>" + dd.innerHTML;
-      dl.style.display="none";
-      return;
-    }
-    lastSubSpeaker=speaker; lastSubChannel=channel; lastSubDL=dl;
-  });
+  // 修正版：サブトークDLまとめ
+const subDLs = Array.from(mainContainer.querySelectorAll("dl.subTalk"));
+const lastSubDLs = {}; // チャンネルごとの最後のDLを保持
+subDLs.forEach(dl=>{
+  const dt=dl.querySelector("dt"), dd=dl.querySelector("dd");
+  if(!dt||!dd) return;
+
+  const speaker = dt.textContent.trim();
+  const channel = dl.dataset.channel; // subTalkのチャンネル名
+  const key = channel + "::" + speaker; // チャンネルとスピーカーでまとめる単位
+  const prev = dl.previousElementSibling;
+
+  // 見出しやHRなどで区切る場合はリセット
+  if(prev && ["H1","H2","H3","H4","H5","H6","HR","BR"].includes(prev.tagName)){
+    Object.keys(lastSubDLs).forEach(k => lastSubDLs[k] = null);
+  }
+
+  if(lastSubDLs[key]){
+    // まとめる
+    lastSubDLs[key].querySelector("dd").innerHTML += "<br>" + dd.innerHTML;
+    dl.style.display="none";
+  } else {
+    // 新しいDLとして登録
+    lastSubDLs[key] = dl;
+  }
+});
 }
 
 function refreshView(){applyGroupTalk();applyMainOnly();}
