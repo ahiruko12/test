@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ccfolia - logs</title>
+<style>
+.char-GM-1 dt,.char-GM-1 dd{color:rgb(136, 136, 136);}
+.char-_____-2 dt,.char-_____-2 dd{color:rgb(34, 34, 34);}
+.char-____-3 dt,.char-____-3 dd{color:rgb(0, 150, 136);}
+.char-system-4 dt,.char-system-4 dd{color:rgb(136, 136, 136);}
+.sub-info{background:#f5f5f5;border:1px solid #ddd;}
+.sub-other{background:#f5f5f5;border:1px solid #ddd;}
+.sub-PC1{background:#f5f5f5;border:1px solid #ddd;}
+
+      .subTalk{margin-left:100px;font-size:0.8em;padding:20px 30px;border-radius:4px;}
+      body{font-family:"Yu Mincho",serif;margin: 40px 40px 40px 30px;background:none;}
+      #bgLayer{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;}
+      h1,h2,h3,h4,h5,h6{color:#4c2020;}
+      dl{margin-bottom:15px;} dt{font-weight:bold;font-size:0.9em;} dd{margin-left:1em;padding:6px 0;}
+      .mainTalk dd{margin-left:1em;padding:6px 0;}
+      #castBox{margin:20px 0;} .castItem{margin-bottom:12px;} .castItem dt{font-weight:bold;font-size:0.9em;color:#4c2020;}
+      .castItem dd{margin-left:1em;padding:4px 0;} .castItem a{color:rgba(76,32,32,0.65);text-decoration:underline;}
+      .castOutputHr{border:none;margin:40px 0;border-top:1px solid rgba(76,32,32,0.45);}
+      hr{border:none;border-top:1px solid rgba(76,32,32,0.45);}
+      .stillBlock{margin:25px 0;text-align:center;}
+      .stillImg{max-width:100%;height:auto;max-height:80vh;display:block;margin:0 auto;}
+      #tocContainer{position:fixed;top:20px;right:30px;z-index:9999;}
+      .menu-btn{width:50px;height:50px;background:none;border:none;cursor:pointer;padding:0;opacity:0.5;
+        position:relative;display:inline-flex;align-items:center;justify-content:center;}
+      .inn{position:relative;width:30px;height:24px;display:inline-block;}
+      .line{position:absolute;left:0;width:100%;height:2px;background:#4c2020;transition:0.3s;}
+      .line:nth-of-type(1){top:0;} .line:nth-of-type(2){top:50%;transform:translateY(-50%);}
+      .line:nth-of-type(3){bottom:0;}
+      .menu-btn.is-open .line:nth-of-type(1){top:50%;transform:translateY(-50%) rotate(45deg);}
+      .menu-btn.is-open .line:nth-of-type(2){opacity:0;}
+      .menu-btn.is-open .line:nth-of-type(3){top:50%;transform:translateY(-50%) rotate(-45deg);bottom:auto;}
+      .menu{position:absolute;top:50px;right:-280px;width:240px;max-height:85vh;background: url(https://lh3.googleusercontent.com/d/1Nf3EnChn-hEB_s3evXWASAHxKNBAHQBx) no-repeat center/cover;border:1px solid rgba(76,32,32,0.45);
+        padding:20px;overflow-y:auto;transition:right 0.25s,opacity 0.25s,transform 0.25s;pointer-events:none;opacity:0;transform:translateY(-10px);}
+      .menu.is-open{right:0;pointer-events:auto;opacity:1;transform:translateY(0);}
+      #tocContent ul{padding-left:0;} #tocContent li{list-style:none;margin:6px 0;}
+      #tocContent a{text-decoration:none;color:#4c2020;} #tocContent a:hover{text-decoration:underline;}
+      #tocContent label{display:block;margin-bottom:4px;color:#4c2020;font-size:0.9em;}
+      #tocContent input[type="checkbox"]{accent-color:#4c2020;}
+      #main{margin:15px;}
+      .castItem.hasImage{display:flex;align-items:center;gap:12px;}
+      .castImg{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid #ccc;}
+      .castItem.hasImage .castTextBox{transform:translate(20px,-4px);}
+      .castItem.hasImage dd { margin-left: 0;padding-left: 0;}
+      .castItem.hasImage dd a {display: inline-block;font-size: 0.8em;max-width: calc(70vw - 90px - 12px);white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+      @media (max-width:600px){body{margin:15px;}.subTalk{margin-left:20px;padding:12px;}}
+    </style>
+
+</head>
+<body>
+<div id="bgLayer" style="background:url(https://lh3.googleusercontent.com/d/1Nf3EnChn-hEB_s3evXWASAHxKNBAHQBx) no-repeat center/cover;"></div>
+<div id="tocContainer"><button id="tocToggle" class="menu-btn"><span class="inn"><span class="line"></span><span class="line"></span><span class="line"></span></span></button><div id="tocContent" class="menu"><h3>目次</h3><label><input type="checkbox" id="mainOnly"> メインのみ表示</label><label><input type="checkbox" id="groupTalkCheckbox"> 発言をまとめる</label><ul><li style="margin-left:0px;"><a href="#castSection">登場人物</a></li><li style="margin-left:0px;"><a href="#head_bf27cb7d-22ad-4007-b9a1-09612424fe3f">見出し</a></li></ul></div></div>
+<div id="main"><h1>ccfolia - logs</h1><h2 id="castSection">登場人物</h2><div id="castBox"><dl class="castItem hasImage"><div class="castImgBox"><img src="https://lh3.googleusercontent.com/d/1ap__WRhnSCz-rAUHmDPFb0Az-5q8lGxl" class="castImg"></div><div class="castTextBox"><dt>斎藤 時実</dt><dd><a href="https://charasheet.vampire-blood.net/5491906" target="_blank">https://charasheet.vampire-blood.net/5491906</a></dd></div></dl></div><hr class="castOutputHr"><dl class="mainTalk char-GM-1" data-channel="main"><dt>GM</dt><dd>セッション始めます</dd></dl><dl class="mainTalk char-_____-2" data-channel="main"><dt>斎藤 時実</dt><dd>よろしくお願いします</dd></dl><br>
+<div class="stillBlock"><img src="https://lh3.googleusercontent.com/d/10Ljc-t6uShOngdua0qdlv0d5pApeYH-P" class="stillImg"></div><hr>
+<h2 id="head_bf27cb7d-22ad-4007-b9a1-09612424fe3f">見出し</h2>
+<br>
+<hr>
+<dl class="mainTalk char-____-3" data-channel="main"><dt>真条継臣</dt><dd>よろしくお願いします</dd></dl><dl class="mainTalk char-_____-2" data-channel="main"><dt>斎藤 時実</dt><dd>「こんにちは」</dd></dl><dl class="mainTalk char-____-3" data-channel="main"><dt>真条継臣</dt><dd>「ああ、こんにちは」</dd></dl><dl class="mainTalk char-system-4" data-channel="main"><dt>system</dt><dd>[   真条継臣 ] HP : 0 → 5</dd></dl><dl class="subTalk char-GM-1 sub-info" data-channel="sub"><dt>GM</dt><dd>情報A<br>これは情報である。</dd></dl>
+<dl class="subTalk char-____-3 sub-other" data-channel="sub"><dt>真条継臣</dt><dd>結局こういうことになるのか</dd><dt>GM</dt><dd>セッションを楽しめるように頑張るぞ！</dd></dl>
+<dl class="subTalk char-GM-1 sub-PC1" data-channel="sub"><dt>GM</dt><dd>見えてる？</dd><dt>真条継臣</dt><dd>OK</dd></dl>
+<dl class="mainTalk char-GM-1" data-channel="main"><dt>GM</dt><dd>シーン1：開始</dd></dl><dl class="mainTalk char-GM-1" data-channel="main"><dt>GM</dt><dd>シーン2：終了</dd></dl><dl class="mainTalk char-GM-1" data-channel="main"><dt>GM</dt><dd>ありがとうございました！</dd></dl></div>
+
+<script>
+const btn=document.getElementById("tocToggle"),menu=document.getElementById("tocContent");
+if(btn&&menu)btn.addEventListener("click",()=>{btn.classList.toggle("is-open");menu.classList.toggle("is-open");});
+document.querySelectorAll("#tocContent a").forEach(link=>{
+  link.addEventListener("click",e=>{
+    e.preventDefault();
+    const target=document.getElementById(link.getAttribute("href").slice(1));
+    if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+});
+
+const mainOnlyCheck=document.getElementById("mainOnly"),
+      groupTalkCheckbox=document.getElementById("groupTalkCheckbox"),
+      mainContainer=document.getElementById("main");
+let allDLs=null;
+
+function initDLs(){
+  if(allDLs)return;
+  allDLs=Array.from(mainContainer.querySelectorAll("dl.mainTalk,dl.subTalk"));
+  allDLs.forEach(dl=>{
+    const dd=dl.querySelector("dd");
+    dl.dataset.originalDD=dd?dd.innerHTML:"";
+    dl.dataset.originalDisplay=dl.style.display||"";
+  });
+}
+
+function applyMainOnly(){
+  if(!mainOnlyCheck)return;
+  const hideSub=mainOnlyCheck.checked;
+  document.querySelectorAll("[data-channel='sub']").forEach(dl=>dl.style.display=hideSub?"none":"");
+}
+
+function applyGroupTalk(){
+  if(!groupTalkCheckbox||!mainContainer)return;
+  initDLs();
+  const group=groupTalkCheckbox.checked;
+  allDLs.forEach(dl=>{const dd=dl.querySelector("dd");if(dd)dd.innerHTML=dl.dataset.originalDD;dl.style.display="";});
+  if(!group)return;
+  let lastSpeaker=null,lastChannel=null,lastDL=null;
+  const breakTags=["H1","H2","H3","H4","H5","H6","HR","BR"];
+  allDLs.forEach(dl=>{
+    const dt=dl.querySelector("dt"),dd=dl.querySelector("dd");
+    if(!dt||!dd)return;
+    const speaker=dt.textContent.trim(),channel=dl.dataset.channel;
+    const prev=dl.previousElementSibling;
+    if(prev&&breakTags.includes(prev.tagName)){lastSpeaker=null;lastChannel=null;lastDL=null;}
+    if(lastSpeaker===speaker&&lastChannel===channel&&lastDL){lastDL.querySelector("dd").innerHTML+="<br>"+dd.innerHTML;dl.style.display="none";return;}
+    lastSpeaker=speaker;lastChannel=channel;lastDL=dl;
+  });
+}
+
+function refreshView(){applyGroupTalk();applyMainOnly();}
+
+if(mainOnlyCheck) mainOnlyCheck.addEventListener("change",refreshView);
+if(groupTalkCheckbox)groupTalkCheckbox.addEventListener("change",refreshView);
+</script>
+
+</body></html>
