@@ -175,18 +175,46 @@ function applyGroupTalk(){
   if(!groupTalkCheckbox||!mainContainer)return;
   initDLs();
   const group=groupTalkCheckbox.checked;
-  allDLs.forEach(dl=>{const dd=dl.querySelector("dd");if(dd)dd.innerHTML=dl.dataset.originalDD;dl.style.display="";});
-  if(!group)return;
-  let lastSpeaker=null,lastChannel=null,lastDL=null;
-  const breakTags=["H1","H2","H3","H4","H5","H6","HR","BR"];
   allDLs.forEach(dl=>{
-    const dt=dl.querySelector("dt"),dd=dl.querySelector("dd");
-    if(!dt||!dd)return;
-    const speaker=dt.textContent.trim(),channel=dl.dataset.channel;
+    const dd=dl.querySelector("dd");
+    if(dd) dd.innerHTML = dl.dataset.originalDD;
+    dl.style.display = "";
+  });
+  if(!group) return;
+
+  const breakTags=["H1","H2","H3","H4","H5","H6","HR","BR"];
+
+  // メイントークまとめ（既存の処理）
+  let lastSpeaker=null,lastChannel=null,lastDL=null;
+  allDLs.forEach(dl=>{
+    const dt=dl.querySelector("dt"), dd=dl.querySelector("dd");
+    if(!dt||!dd) return;
+    const speaker=dt.textContent.trim(), channel=dl.dataset.channel;
     const prev=dl.previousElementSibling;
-    if(prev&&breakTags.includes(prev.tagName)){lastSpeaker=null;lastChannel=null;lastDL=null;}
-    if(lastSpeaker===speaker&&lastChannel===channel&&lastDL){lastDL.querySelector("dd").innerHTML+="<br>"+dd.innerHTML;dl.style.display="none";return;}
-    lastSpeaker=speaker;lastChannel=channel;lastDL=dl;
+    if(prev && breakTags.includes(prev.tagName)){ lastSpeaker=null; lastChannel=null; lastDL=null; }
+    if(lastSpeaker===speaker && lastChannel===channel && lastDL){
+      lastDL.querySelector("dd").innerHTML += "<br>" + dd.innerHTML;
+      dl.style.display="none";
+      return;
+    }
+    lastSpeaker=speaker; lastChannel=channel; lastDL=dl;
+  });
+
+  // サブトークDLまとめ（チャンネルごとに跨ぐ）
+  const subDLs = Array.from(mainContainer.querySelectorAll("dl.subTalk"));
+  let lastSubSpeaker=null, lastSubChannel=null, lastSubDL=null;
+  subDLs.forEach(dl=>{
+    const dt=dl.querySelector("dt"), dd=dl.querySelector("dd");
+    if(!dt||!dd) return;
+    const speaker=dt.textContent.trim(), channel=dl.dataset.channel;
+    const prev=dl.previousElementSibling;
+    if(prev && breakTags.includes(prev.tagName)){ lastSubSpeaker=null; lastSubChannel=null; lastSubDL=null; }
+    if(lastSubSpeaker===speaker && lastSubChannel===channel && lastSubDL){
+      lastSubDL.querySelector("dd").innerHTML += "<br>" + dd.innerHTML;
+      dl.style.display="none";
+      return;
+    }
+    lastSubSpeaker=speaker; lastSubChannel=channel; lastSubDL=dl;
   });
 }
 
