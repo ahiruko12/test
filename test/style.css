@@ -1,0 +1,487 @@
+/* ===================== */
+/*    全体ベース         */
+/* ===================== */
+body {
+  font-family: sans-serif;
+  font-size: 16px;
+  margin: 40px;
+  background: #f5f5f5;
+}
+
+a:link, a:visited {
+  color: #3d61a9;
+  text-decoration: none;
+}
+a:hover { color: #1135ed; }
+a:active { color: #3d61a9; }
+
+/* ===================== */
+/*  ヘッダー・ファイル設定整理版 */
+/* ===================== */
+.header-container {
+  margin-bottom: 20px;
+}
+
+/* 初期非表示、ファイル読み込み後に表示 */
+#metaEditor {
+  display: none;          /* 初期は非表示 */
+  flex-wrap: wrap;        /* 横幅に応じて折り返す */
+  gap: 30px;              /* 横並び間隔 */
+  align-items: center;    /* 縦揃え */
+  margin-top: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+/* ラベル・span・ボタンをまとめて縦揃えに */
+#metaEditor label,
+#metaEditor span,
+#metaEditor button {
+  display: flex;
+  align-items: center; /* 縦揃え */
+  gap: 4px;            /* 内部要素間隔 */
+}
+
+/* 入力欄幅 */
+#metaEditor input[type="text"] {
+  width: 40vh;        /* 必要に応じて調整 */
+  padding: 4px 6px;
+  font-size: 14px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #fdfdfd;
+}
+
+/* 書き出しファイル名の入力欄だけ幅を広く */
+#metaEditor label:nth-of-type(2) input[type="text"] {
+  width: 50vh;
+}
+
+/* 書き出しファイル名の入力欄と .html をくっつける */
+#metaEditor label:nth-of-type(2) {
+  display: flex;
+  align-items: center;
+  gap: 0;              /* 入力欄と .html の間は余白なし */
+}
+
+/* .html spanの余白はラベル全体に含めず、右側だけの余白を作る */
+#metaEditor span.html-ext {
+  margin-left: 0;
+  margin-right: 10px;  /* 次のボタンとの余白 */
+}
+
+/* ===================== */
+/*  セクション共通       */
+/* ===================== */
+.section {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+/* ===================== */
+/* セクション2: 登場人物編集 */
+/* ===================== */
+
+/* 区切り線 */
+#section-cast-editor hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 20px 0;
+}
+
+/* 編集エリア全体 */
+#editors {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+#editors > div {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 登場人物・チャンネル編集欄 */
+#charEditor, #channelEditor {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  background: #fff;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 登場人物リスト */
+#castEditor {
+  display: block;
+  margin-top: 10px;
+}
+
+#castListArea {
+  display: block;        /* 各キャラクターを独立させる */
+  width: 100%;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+/* ===================== */
+/* キャラクター行 */
+.castRow {
+  display: flex;
+  flex-wrap: wrap;       /* 小画面で折り返す */
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fdfdfd;
+}
+
+/* 入力欄 */
+.castRow input[type="text"] {
+  flex: 1 1 200px;
+  padding: 4px 6px;
+  font-size: 14px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.castRow input.castName { flex: 2 1 200px; }
+.castRow input.castImage { flex: 3 1 200px; }
+.castRow input.castSheet { flex: 3 1 200px; }
+
+/* ↑↓−ボタン */
+.castRow button, .btnRow button {
+  flex: 0 0 36px;
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #f0f0f0;
+  cursor: pointer;
+}
+
+.castRow button:hover { background: #e0e0e0; }
+.castRow button:disabled {
+  background: #ddd;
+  color: #888;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* +追加ボタン */
+.addCastBtn {
+  background-color: #fff;
+  color: #3d61a9;
+  border: 1px solid #3d61a9;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  width: 200px;
+}
+
+.addCastBtn:hover {
+  background-color: #3d61a9;
+  color: #e0e0e0;
+}
+
+/* ===================== */
+/* ログ背景・装飾色 */
+
+.accent-label{
+  margin-left: 40px; /* 好きな余白に変更 */
+}
+
+/* ===================== */
+/* キャラクター一括編集行 */
+.charRow {
+  display: flex;
+  flex-wrap: wrap;        /* 小画面で折り返す */
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;     /* 行ごとの余白 */
+  padding: 6px;
+  border: 1px solid #ccc; /* 個別枠 */
+  border-radius: 4px;
+  background: #fdfdfd;
+}
+
+/* 各要素 */
+.charRow .oldName { 
+  min-width: 140px; 
+  font-weight: bold; 
+  flex-shrink: 0; 
+}
+
+.charRow .nameArrow { 
+  min-width: 120px; 
+  flex-shrink: 0; 
+}
+
+.charRow .newName {
+  flex: 1; 
+  padding: 4px 6px;
+  border: 1px solid #aaa; 
+  border-radius: 4px; 
+  font-size: 14px; 
+  box-sizing: border-box;
+}
+
+.charRow .colorLabel { 
+  margin-left: 15px; 
+  flex-shrink: 0; 
+}
+
+.charRow .newColor { 
+  width: 60px; 
+  height: 24px; 
+  border: 1px solid #aaa; 
+  border-radius: 2px; 
+  cursor: pointer; 
+  flex-shrink: 0; 
+}
+
+/* 一括編集ボタン */
+#applyCharBtn {
+  background-color: #fff;
+  color: #3d61a9;
+  border: 1px solid #3d61a9;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#applyCharBtn:hover { 
+  background-color: #3d61a9; 
+  color: #e0e0e0; 
+}
+
+/* ===================== */
+/* チャンネル色選択カーソル */
+/* ===================== */
+.channelBox input[type="color"] {
+  cursor: pointer;        /* デフォルトはクリック可能 */
+}
+
+.channelBox input[type="color"]:disabled {
+  cursor: default;        /* 無効な場合は通常カーソル */
+  opacity: 0.6;           /* 視覚的にも無効っぽく */
+}
+
+/* ===================== */
+/* セクション3: 発言編集 & プレビュー
+/* ===================== */
+
+/* 左右コンテナ */
+#section-log-preview #container {
+  display: flex;
+  gap: 5px;
+  align-items: stretch; /* 高さを揃える */
+  height: calc(100vh - 40px); /* 画面いっぱい（上下余白込み） */
+}
+
+
+/* 発言編集エリア */
+#logAreaContainer {
+  flex: 1;               /* 左右1:1 */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-width: 300px;
+  margin-left: 4px;       /* セクション全体を右にずらす */
+}
+
+/* プレビューエリア */
+#previewContainer {
+  flex: 1;               /* 左右1:1 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;      /* iframeがスクロールする */
+  min-width: 300px;
+}
+
+/* 発言内部 */
+#logArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  direction: rtl;       /* スクロールバーを左側に */
+}
+
+/* 発言ブロック */
+.msg {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  word-break: break-word;
+  direction: ltr;       /* テキストは通常の左→右 */
+}
+
+/* 区切り・空白・見出し */
+.msg.type-space,
+.msg.type-hr,
+.msg.type-heading,
+.msg.type-still {
+  background: #f0f0f0;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+/* 発言ヘッダー（スピーカー＋チャンネル） */
+.msg > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.channelSelect {
+  font-size: 14px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+  background: #fdfdfd;
+}
+
+/* textarea */
+textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #fdfdfd;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+/* ボタン行 */
+.btnRow {
+  display: flex;
+  flex-wrap: wrap;       /* 小画面では折り返し */
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;   /* 高さを揃える */
+}
+
+/* ボタン */
+.btnRow button {
+  flex: 0 0 auto;        /* 横幅固定、縦は自動 */
+  padding: 4px 8px;      /* 縦横比を整える */
+  font-size: 14px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #f0f0f0;
+  cursor: pointer;
+  height: 30px;          /* 高さを統一 */
+  line-height: 1.2;
+}
+
+/* ボタン ホバー */
+.btnRow button:hover {
+  background: #e0e0e0;
+}
+
+/* selectボックス */
+.btnRow select {
+  height: 30px;          /* ボタンと揃える */
+  padding: 2px 6px;
+  font-size: 14px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+#logArea > .msg,
+#logArea > .msg.type-space,
+#logArea > .msg.type-hr,
+#logArea > .msg.type-heading {
+  margin-left: 20px; /* 内側だけ右にずらす */
+}
+
+/* iframeプレビュー */
+#preview {
+  flex: 1;
+  width: 100%;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+/* ===================== */
+/*  発言ヘッダー・チャンネル */
+.talkHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.channelSelect {
+  font-size: 14px;
+  padding: 4px 6px;
+}
+
+.btnRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* 見出しプルダウン */
+.headingLevel {
+  height: 25px;           /* ボタンと高さを揃える */
+  padding: 2px 6px;
+  font-size: 13px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  line-height: 1.2;
+  width: 100px;           /* 最低限の横幅に調整 */
+  flex-shrink: 0;         /* 横幅を縮めすぎない */
+}
+
+/* ===================== */
+/*  トップへ戻るボタン */
+.top-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5em 1em;
+  background-color: #f5f5f5;
+  color: #666;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9em;
+  border: 1px solid #666;
+}
+
+.top-button::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 10px;
+  border-top: 2px solid #666;
+  border-right: 2px solid #666;
+  transform: rotate(-135deg);
+}
